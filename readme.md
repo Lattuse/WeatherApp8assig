@@ -1,7 +1,7 @@
 # Weather App (Android)
 
 ## Overview
-This project is a simple **Weather Application for Android**, developed as part of **Assignment 7 – Data & Networking (API Integration)**.  
+This project is a simple **Weather Application for Android**, developed as part of **Assignment 7 - Data & Networking (API Integration)**.  
 The app allows users to search for a city and view current weather information and a short forecast, fetched from a public REST API.  
 It also supports **offline mode** by displaying cached data when the network is unavailable.
 
