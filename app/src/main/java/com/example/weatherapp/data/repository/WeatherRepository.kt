@@ -45,8 +45,7 @@ class WeatherRepository(
     suspend fun readCachedWeather(): WeatherInfo? {
         val cached = dataStore.cachedJsonFlow().first() ?: return null
         val dto = json.decodeFromString<ForecastResponseDto>(cached)
-        // city name мы не храним в dto, но в UI можно показать "Cached city"
-        // Для простоты используем "Cached"
+
         return mapToWeatherInfo(city = "Cached", dto = dto, isOffline = true)
     }
 

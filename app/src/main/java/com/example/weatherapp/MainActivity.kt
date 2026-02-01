@@ -22,7 +22,6 @@ class MainActivity : ComponentActivity() {
         )
 
         setContent {
-            // Factory без Hilt:
             val vm: WeatherViewModel = viewModel(factory = SimpleVmFactory { WeatherViewModel(repo, dataStore) })
             AppNav(vm)
         }

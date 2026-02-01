@@ -2,9 +2,9 @@ package com.example.weatherapp.domain.model
 
 data class WeatherInfo(
     val city: String,
-    val updatedAt: String,     // ISO из API или отформатируешь в UI
+    val updatedAt: String,
     val temperature: Double,
-    val tempUnit: String,      // "°C" / "°F"
+    val tempUnit: String,
     val conditionText: String,
     val minTemp: Double,
     val maxTemp: Double,
@@ -16,7 +16,7 @@ data class WeatherInfo(
 )
 
 data class ForecastDay(
-    val date: String,          // yyyy-mm-dd
+    val date: String,
     val min: Double,
     val max: Double,
     val conditionText: String
