@@ -99,7 +99,8 @@ The Favorites screen uses **Firebase Realtime Database listeners** (`ValueEventL
 
 
 <p align="center">
-  <img src="img.png" width="260">
+  <img src="img.png" width="800">
+
   <img src="img_1.png" width="260">
 </p>
 ---
