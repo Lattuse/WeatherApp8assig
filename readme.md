@@ -97,8 +97,9 @@ The Favorites screen uses **Firebase Realtime Database listeners** (`ValueEventL
     - deleting an item
 - Changes made in Firebase Console are reflected instantly in the running app.
 
-*(Screenshots of the Favorites screen and Firebase Console can be attached here.)*
 
+![img.png](img.png)
+![img_1.png](img_1.png)
 ---
 
 ## Security Rules
