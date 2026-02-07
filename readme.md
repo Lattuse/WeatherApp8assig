@@ -1,159 +1,147 @@
-# Weather App (Android)
+# Assignment 8 - Firebase & App Integration
 
 ## Overview
-This project is a simple **Weather Application for Android**, developed as part of **Assignment 7 - Data & Networking (API Integration)**.  
-The app allows users to search for a city and view current weather information and a short forecast, fetched from a public REST API.  
-It also supports **offline mode** by displaying cached data when the network is unavailable.
+This assignment extends the Weather App from **Assignment 7** by integrating **Firebase Realtime Database** and **Firebase Authentication**.  
+The app now supports a **Favorites & Notes** module with full **CRUD operations** and **real-time UI updates**.
 
-The application is written in **Kotlin**, uses **Jetpack Compose** for UI, and follows **MVVM architecture** with a repository pattern.
-
----
-
-## Features
-- Search weather by city name
-- Display current weather:
-    - City name
-    - Temperature
-    - Weather condition
-    - Min / Max temperature
-    - Humidity
-    - Wind speed
-    - Last update time
-- Weather forecast for **at least 3 days**
-- Offline mode with cached data and clear **OFFLINE** label
-- Search history for recently searched cities
-- Settings screen to switch units:
-    - Celsius (°C)
-    - Fahrenheit (°F)
-- Graceful error handling (empty input, city not found, no internet, API errors)
+Each user has their own list of favorite cities stored in the cloud and synchronized in real time.
 
 ---
 
-## Used API
-**Open-Meteo API** (no API key required)
+## Firebase Setup Steps
 
-### 1. Geocoding API
-Used to convert a city name into geographic coordinates.
-
-Endpoint: https://geocoding-api.open-meteo.com/v1/search
-
-Parameters:
-- `name` – city name
-- `count` – number of results
-- `language` – response language
-- `format` – response format (json)
-
----
-
-### 2. Forecast API
-Used to fetch current weather and daily forecast.
-
-Endpoint: https://api.open-meteo.com/v1/forecast
-
-Parameters:
-- `latitude`
-- `longitude`
-- `timezone=auto`
-- `temperature_unit` (celsius or fahrenheit)
-- `current` – temperature, humidity, wind speed, weather code
-- `daily` – min/max temperature, weather code
+1. Created a new project in **Firebase Console**.
+2. Added an **Android app** to the Firebase project using the app’s `applicationId`.
+3. Downloaded and added `google-services.json` to the `app/` directory.
+4. Enabled **Anonymous Authentication** in:
+   ```
+   Firebase Console -> Authentication -> Sign-in method
+   ```
+5. Created a **Realtime Database** instance.
+6. Added Firebase SDK dependencies using **Firebase BoM** in Gradle.
+7. Applied the `google-services` Gradle plugin.
+8. Explicitly configured the Realtime Database URL in code to ensure stable connectivity.
 
 ---
 
-## Architecture
-The app follows **MVVM (Model–View–ViewModel)** with a **Repository** layer.
-
-### Layers:
-- **UI layer**  
-  Jetpack Compose screens (Search, Weather, Settings)
-
-- **ViewModel layer**  
-  Manages UI state using `StateFlow` and handles user actions
-
-- **Repository layer**  
-  Single source of truth for data  
-  Decides whether to load data from network or local cache
-
-- **Data layer**
-    - Remote: Retrofit + OkHttp
-    - Local: DataStore (Preferences)
+## Firebase Products Used
+- **Firebase Authentication** - Anonymous Auth
+- **Firebase Realtime Database**
 
 ---
 
-## Networking
-- **Retrofit** – HTTP client
-- **OkHttp** – networking and logging
-- **kotlinx.serialization** – JSON parsing
+## Data Model
 
-All network requests are executed using Kotlin Coroutines.
+Favorites are stored per authenticated user (`uid`) in the Realtime Database.
 
----
+### Database Structure
+```json
+{
+  "users": {
+    "dGeZ8VYz4WbkYc2JBOw9JOhWaVS2": {
+      "favorites": {
+        "-OktDfEcM_KCkJLQK1QO": {
+          "cityName": "Astana",
+          "createdAt": 1770486651991,
+          "createdBy": "dGeZ8VYz4WbkYc2JBOw9JOhWaVS2",
+          "id": "-OktDfEcM_KCkJLQK1QO",
+          "note": "Groove street.. home"
+        },
+        "-OktGREyGDb6qeTn6tQZ": {
+          "cityName": "Almaty",
+          "createdAt": 1770487377003,
+          "createdBy": "dGeZ8VYz4WbkYc2JBOw9JOhWaVS2",
+          "id": "-OktGREyGDb6qeTn6tQZ",
+          "note": "Sunny city"
+        }
+      }
+    }
+  }
+}
+```
 
-## Local Caching (Offline Support)
-- The **last successful weather response** is serialized to JSON and saved locally using **DataStore Preferences**
-- Cached data includes:
-    - Weather response
-    - City name
-    - Timestamp
-- When the network is unavailable or a request fails:
-    - The app attempts to load cached data
-    - Cached data is displayed with an **OFFLINE (cached)** label
-
----
-
-## Error Handling
-The app handles the following cases gracefully:
-- Empty city input
-- City not found
-- No internet connection
-- Network timeout
-- API or parsing errors
-
-If cached data is available, it is shown instead of failing completely.
-
----
-
-## UI & UX
-- Built with **Jetpack Compose**
-- Clear layout and spacing
-- Loading indicators during network requests
-- Readable text and contrast
-- Simple navigation between screens
-- Accessible and stable UI
+### Fields Description
+- `id` - unique Firebase-generated ID
+- `cityName` - name of the favorite city
+- `note` - optional user note
+- `createdAt` - timestamp (milliseconds)
+- `createdBy` - Firebase Authentication `uid`
 
 ---
 
-## How to Run the App
-1. Open the project in **Android Studio**
-2. Sync Gradle dependencies
-3. Run the app on an emulator or physical device
-4. Enter a city name and press **Search**
-5. View current weather and forecast
-6. Turn off internet to test offline mode
+## CRUD Operations
+
+The app implements full CRUD functionality:
+- **Create** - add a favorite city with an optional note
+- **Read** - observe favorites list in real time
+- **Update** - edit a note for an existing favorite
+- **Delete** - remove a favorite city
+
+All operations are scoped to the authenticated user.
 
 ---
 
-## Project Requirements Checklist
-- [x] Public REST API integration
-- [x] Correct HTTP requests and JSON parsing
-- [x] MVVM + Repository architecture
-- [x] Jetpack Compose UI
-- [x] 3-day weather forecast
-- [x] Offline cache with DataStore
-- [x] Error handling
-- [x] Settings (Celsius / Fahrenheit)
-- [x] Search history
-- [x] Clean and readable code
+## Real-Time Updates
+
+The Favorites screen uses **Firebase Realtime Database listeners** (`ValueEventListener`) wrapped in Kotlin `Flow`.
+
+### Behavior
+- When a favorite is added, edited, or deleted:
+    - The database updates instantly
+    - The UI updates automatically without manual refresh
+
+### Evidence of Real-Time Updates
+- Favorites list updates immediately after:
+    - adding a new city
+    - editing a note
+    - deleting an item
+- Changes made in Firebase Console are reflected instantly in the running app.
+
+*(Screenshots of the Favorites screen and Firebase Console can be attached here.)*
 
 ---
 
-## Known Limitations
-- Weather condition descriptions are simplified based on weather codes
-- Forecast is limited to the first 3 daily entries
-- City name for cached data is simplified
+## Security Rules
+
+The following Firebase Realtime Database rules are used to ensure data security:
+
+```json
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && auth.uid == $uid"
+      }
+    }
+  }
+}
+```
+
+### Explanation
+- Only authenticated users can read or write data.
+- Users can access **only their own data**, identified by `auth.uid`.
 
 ---
 
-## Attribution
-Weather data provided by **Open-Meteo**  
-https://open-meteo.com/
+## Architecture & Integration
+
+- The Firebase logic is encapsulated in a **Repository layer**.
+- UI communicates with Firebase only through **ViewModel**.
+- Real-time listeners are lifecycle-aware and automatically cleaned up.
+- Existing Weather App architecture (MVVM + Repository) is preserved.
+
+---
+
+## Conclusion
+
+This assignment demonstrates:
+- Successful Firebase integration
+- Cloud data persistence
+- Real-time UI synchronization
+- Secure access control
+- Clean separation of concerns
+
+The Weather App was extended without breaking existing functionality, fulfilling all Assignment 8 requirements.
+
+
