@@ -103,6 +103,7 @@ The Favorites screen uses **Firebase Realtime Database listeners** (`ValueEventL
 
   <img src="img_1.png" width="260">
 </p>
+
 ---
 
 ## Security Rules
